@@ -1,36 +1,44 @@
 function onEdit(e) {
   const sheet = e.source.getActiveSheet();
   const sheetName = sheet.getName();
-
-  // 対象シート以外は無視
   if (!sheetName.startsWith("予約表_")) return;
 
-  const editedRange = e.range;
-  const editedRow = editedRange.getRow();
-  const editedCol = editedRange.getColumn();
+  const range = e.range;
+  const numRows = range.getNumRows();
+  const numCols = range.getNumColumns();
 
-  // 編集が時間列（1列目）や見出し行（1行目）ならスキップ
-  if (editedRow === 1 || editedCol === 1) return;
+  const values = range.getValues();
 
-  const patientName = e.value;
-  if (!patientName) return;  // 空欄の場合スキップ
-
-  const date = sheet.getRange(1, editedCol).getValue();   // 日付列のヘッダー
-  const time = sheet.getRange(editedRow, 1).getValue();   // 行の時間枠
-
-  // 同じ時間枠の他列に同じ名前があるか確認（ブッキングチェック）
-  const rowValues = sheet.getRange(editedRow, 2, 1, sheet.getLastColumn() - 1).getValues()[0];
-  const count = rowValues.filter(v => v === patientName).length;
-  if (count > 1) {
-    SpreadsheetApp.getUi().alert(`この時間に既に ${patientName} さんの予約があります！`);
-  }
-
-  // 履歴シートに記録
   const historySheet = e.source.getSheetByName("履歴") || e.source.insertSheet("履歴");
   if (historySheet.getLastRow() === 0) {
     historySheet.appendRow(["タイムスタンプ", "日付", "時間", "患者名", "ユーザー"]);
   }
-
   const user = Session.getActiveUser().getEmail();
-  historySheet.appendRow([new Date(), date, time, patientName, user]);
+
+  for (let r = 0; r < numRows; r++) {
+    const row = range.getRow() + r;
+    if (row === 1) continue; // 見出し行スキップ
+
+    const time = sheet.getRange(row, 1).getValue();
+
+    for (let c = 0; c < numCols; c++) {
+      const col = range.getColumn() + c;
+      if (col === 1) continue; // 時間列スキップ
+
+      const patientName = values[r][c];
+      if (!patientName) continue; // 空欄スキップ
+
+      const date = sheet.getRange(1, col).getValue();
+
+      // 同じ時間枠の行で同名が複数あればブッキング警告
+      const rowValues = sheet.getRange(row, 2, 1, sheet.getLastColumn() - 1).getValues()[0];
+      const count = rowValues.filter(v => v === patientName).length;
+      if (count > 1) {
+        SpreadsheetApp.getUi().alert(`この時間に既に ${patientName} さんの予約があります！`);
+      }
+
+      // 履歴へ記録
+      historySheet.appendRow([new Date(), date, time, patientName, user]);
+    }
+  }
 }

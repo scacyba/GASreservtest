@@ -36,6 +36,10 @@ function createMonthlyReservationSheet(m) {
 
   sheet.getDataRange().setHorizontalAlignment("center");
   sheet.getDataRange().setVerticalAlignment("middle");
+
+  // シートを一番左に移動
+  spreadsheet.setActiveSheet(sheet);
+  spreadsheet.moveActiveSheet(1); // インデックス1が一番左
 }
 
 function generateTimeSlots(startTime, endTime, intervalMinutes) {

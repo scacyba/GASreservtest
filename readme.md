@@ -14,3 +14,11 @@ $ clasp clone 1nuzUcCvlF-95aKD42nJhGz_b3wsA97gfcIfUqWsjcyrvzQRMCu4ZRTze
 └─ サイドバー予約.html
 Cloned 5 files.
 
+idtrm@otaskacyba MINGW64 ~/vscode/scacyba/GASreservtest (main)
+$ clasp pull
+└─ appsscript.json
+└─ シート作成.js
+└─ 重複等.js
+└─ Googleフォーム.js
+└─ サイドバー予約.html
+Pulled 5 files.
