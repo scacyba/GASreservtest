@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <body>
+      <p>予約フォーム</p>
+    <div>
+      <p>日付: <?= date ?></p>
+      <p>時間: <?= time ?></p>
+      <p><input type="text" id="name" placeholder="患者名を入力" /></p>
+      <p><input type="text" id="doctor" placeholder="担当医を入力" /></p>
+      <p><input type="text" id="comment" placeholder="コメントを入力" /></p>
+      <p><button onclick="submit()">登録</button></p>
+    </div>
+    <script>
+      function submit() {
+//        alert("submit start");
+        const name = document.getElementById("name").value.trim();
+        const doctor = document.getElementById("doctor").value.trim();
+        const comment = document.getElementById("comment").value.trim();
+        const csv = [name, doctor, comment]
+          .map(v => `"${v.replace(/"/g, '""')}"`)  // ダブルクオート内の " もエスケープ
+          .join(",");
+
+        if (!name || !doctor) {
+          alert("患者名と担当医は必須です");
+          return;
+        }
+
+        google.script.run.withSuccessHandler(() => {
+          google.script.host.close();
+        }).registerReservation('<?= date ?>', '<?= time ?>', csv);
+      }
+    </script>
+
+  </body>
+</html>
